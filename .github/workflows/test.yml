@@ -1,0 +1,25 @@
+'on':
+  push: null
+  pull_request: null
+  workflow_dispatch:
+jobs:
+  format-checker:
+    runs-on: ubuntu-latest
+    env:
+      # When there is no base commit (e.g., first push to a new branch), 
+      # GitHub assigns a string of zeros to event.before. It's necessary to 
+      # handle this separately
+      NULL_COMMIT: '0000000000000000000000000000000000000000'
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      
+      -name: git clone
+      run: git clone https://github.com/apache/druid
+      -name: test1
+      run: mvn clean install -DskipTests -pl extensions-core/parquet-extensions -am
+      -name: test2
+      run: mvn -pl extensions-core/parquet-extensions test -Dtest=org.apache.druid.data.input.parquet.CompatParquetReaderTest#testBinaryAsString
+      -name: test3
+      run: mvn -pl extensions-core/parquet-extensions edu.illinois:nondex-maven-plugin:2.1.1:nondex -Dtest=org.apache.druid.data.input.parquet.CompatParquetReaderTest#testBinaryAsString
